@@ -10,7 +10,7 @@ export function useDrag(
   widgets: Widget[],
   setWidgets: React.Dispatch<React.SetStateAction<Widget[]>>,
   canvas: CanvasState,
-  canvasRef: React.RefObject<HTMLDivElement>,
+  canvasRef: React.RefObject<HTMLDivElement | null>,
   updatePan: (panX: number, panY: number) => void,
 ) {
   const { saveWidgets } = usePersistence()
@@ -18,7 +18,7 @@ export function useDrag(
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef = useRef<number | null>(null)
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, widgetId?: string) => {
