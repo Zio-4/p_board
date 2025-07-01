@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react"
 import { Canvas } from "./canvas"
 import { CanvasControls } from "./canvas-controls"
-import { WidgetFactory } from "./widget-factory"
+import { WidgetFactoryV2 } from "./widget-factory-v2"
 import { WidgetLibrary } from "./widget-library"
 import { ThemeSelector } from "./theme-selector"
 import { useCanvas } from "../hooks/use-canvas"
@@ -108,7 +108,7 @@ export default function PersonalDashboard() {
 
       <Canvas ref={canvasRef} canvas={canvas} onMouseDown={handleMouseDown} onWheel={handleWheel}>
         {widgets.map((widget) => (
-          <WidgetFactory
+          <WidgetFactoryV2
             key={widget.id}
             widget={widget}
             isDragging={draggedWidget === widget.id}
