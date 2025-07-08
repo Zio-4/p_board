@@ -1,33 +1,21 @@
-import type { IWidget, WidgetConfig, WidgetState, WidgetRenderProps } from '../types/widget'
+import type { WidgetConfig, WidgetRenderProps } from '../types/widget'
 
-export abstract class BaseWidgetClass<TData = any, TSettings = any> implements IWidget<TData, TSettings> {
+export abstract class BaseWidgetClass<TSettings = any> {
   config: WidgetConfig
-  state: WidgetState<TData>
   
   constructor(config: WidgetConfig) {
     this.config = config
-    this.state = {
-      data: null as TData,
-      loading: false,
-      error: null,
-      lastUpdated: null
-    }
   }
 
-  async init(): Promise<void> {
-    // Load saved state from localStorage
-    const savedState = this.loadFromLocalStorage()
-    if (savedState) {
-      this.state = savedState
-    }
-    
-    // Fetch initial data
-    await this.fetchData()
-  }
+  // Abstract method for rendering - data will be passed from React Query
+  abstract render(props: WidgetRenderProps & { 
+    data: any
+    isLoading: boolean
+    error: Error | null
+    refetch: () => void
+  }): React.ReactElement
 
-  abstract fetchData(): Promise<void>
-  abstract render(props: WidgetRenderProps): React.ReactElement
-
+  // Settings management (still handled by the class)
   updateSettings(settings: Partial<TSettings>): void {
     this.config.settings = {
       ...this.config.settings,
@@ -36,32 +24,26 @@ export abstract class BaseWidgetClass<TData = any, TSettings = any> implements I
     this.saveToLocalStorage()
   }
 
-  getData(): TData | null {
-    return this.state.data
+  // Configuration for React Query (query key, enabled state, etc.)
+  abstract getQueryConfig(): {
+    queryKey: string[]
+    enabled: boolean
+    staleTime?: number
+    refetchInterval?: number
   }
 
-  dispose(): void {
-    // Clean up any intervals, listeners, etc.
-  }
+  // Data fetching function to be used by React Query
+  abstract fetchData(): Promise<any>
 
-  protected setState(updates: Partial<WidgetState<TData>>): void {
-    this.state = {
-      ...this.state,
-      ...updates
-    }
-    this.saveToLocalStorage()
-  }
-
-  protected saveToLocalStorage(): void {
+  private saveToLocalStorage(): void {
     const key = `widget_${this.config.id}`
     const dataToSave = {
-      config: this.config,
-      state: this.state
+      config: this.config
     }
     localStorage.setItem(key, JSON.stringify(dataToSave))
   }
 
-  protected loadFromLocalStorage(): WidgetState<TData> | null {
+  protected loadFromLocalStorage(): void {
     const key = `widget_${this.config.id}`
     const saved = localStorage.getItem(key)
     if (saved) {
@@ -71,15 +53,14 @@ export abstract class BaseWidgetClass<TData = any, TSettings = any> implements I
         if (parsed.config?.settings) {
           this.config.settings = parsed.config.settings
         }
-        // Convert lastUpdated back to Date
-        if (parsed.state?.lastUpdated) {
-          parsed.state.lastUpdated = new Date(parsed.state.lastUpdated)
-        }
-        return parsed.state
       } catch (e) {
         console.error('Failed to parse saved widget data:', e)
       }
     }
-    return null
+  }
+
+  // Initialize method to load saved settings
+  init(): void {
+    this.loadFromLocalStorage()
   }
 } 

@@ -152,4 +152,15 @@ export const widgetTemplates: WidgetTemplate[] = [
     icon: "🌤️",
     category: "Information",
   },
+  {
+    id: "weather-v3",
+    name: "Weather (React Query)",
+    description: "Real-time weather with React Query caching and deduplication",
+    type: "weather-v3",
+    defaultWidth: 280,
+    defaultHeight: 220,
+    defaultData: {},
+    icon: "🌤️",
+    category: "Information",
+  },
 ]

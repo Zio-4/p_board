@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback, useEffect } from "react"
 import { Canvas } from "./canvas"
 import { CanvasControls } from "./canvas-controls"
-import { WidgetFactoryV2 } from "./widget-factory-v2"
 import { WidgetLibrary } from "./widget-library"
 import { ThemeSelector } from "./theme-selector"
 import { useCanvas } from "../hooks/use-canvas"
@@ -12,6 +11,7 @@ import { useTheme } from "../hooks/use-theme"
 import { initialWidgets } from "../data/mock-data"
 import type { Widget, WidgetTemplate } from "../types/widget"
 import { usePersistence } from "../hooks/use-persistence"
+import { WidgetFactory } from "./widget-factory"
 
 export default function PersonalDashboard() {
   const { loadWidgets, saveWidgets, clearSavedData } = usePersistence()
@@ -26,8 +26,10 @@ export default function PersonalDashboard() {
   useEffect(() => {
     const savedWidgets = loadWidgets()
     if (savedWidgets && savedWidgets.length > 0) {
+      console.log("Saved widgets loaded", savedWidgets)
       setWidgets(savedWidgets)
     } else {
+      console.log("No saved widgets found, using initial widgets:", initialWidgets)
       setWidgets(initialWidgets)
     }
     setIsLoading(false)
@@ -107,7 +109,7 @@ export default function PersonalDashboard() {
       />
 
       <Canvas ref={canvasRef} canvas={canvas} onMouseDown={handleMouseDown} onWheel={handleWheel}>
-        {widgets.map((widget) => (
+        {/* {widgets.map((widget) => (
           <WidgetFactoryV2
             key={widget.id}
             widget={widget}
@@ -115,7 +117,31 @@ export default function PersonalDashboard() {
             onMouseDown={handleMouseDown}
             onDataUpdate={updateWidgetData}
           />
-        ))}
+        ))} */}
+        <WidgetFactory
+          widget={{
+            id: 'weather',
+            type: 'weather',
+            title: 'Weather',
+            x: 100,
+            y: 100,
+            width: 400,
+            height: 300,
+            data: {
+              temperature: 70,
+              feelsLike: 72,
+              condition: 'Sunny',
+              description: 'Clear sky',
+              location: 'Austin, TX',
+              humidity: 40,
+              windSpeed: 5,
+              icon: 'sunny'
+            }
+          }}
+          isDragging={draggedWidget === 'weather'}
+          onMouseDown={handleMouseDown}
+          onDataUpdate={updateWidgetData}
+        />
       </Canvas>
 
       <WidgetLibrary
